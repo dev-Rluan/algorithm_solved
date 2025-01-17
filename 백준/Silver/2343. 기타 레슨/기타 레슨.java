@@ -7,50 +7,46 @@ public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
-        // n개의 강의를
-        // m개의 블루레이안에 하나씩 넣기
 
+        // n개의 강의, m개의 블루레이
         int n = Integer.parseInt(st.nextToken());
         int m = Integer.parseInt(st.nextToken());
 
-        int[] arr = new int[n+1];
+        int[] arr = new int[n];
+        int maxLecture = 0, totalSum = 0;
 
-        int end = 0;
-        int left = 0;
-        // 강의별 시간(분) 받기
+        // 강의 시간을 입력받음
         st = new StringTokenizer(br.readLine());
         for (int i = 0; i < n; i++) {
             arr[i] = Integer.parseInt(st.nextToken());
-            end += arr[i];
-            left = Math.max(left, arr[i]);
+            totalSum += arr[i];
+            maxLecture = Math.max(maxLecture, arr[i]);
         }
 
-        // m개의 블루레이에 값을 담아야함
-        // 가능한 블루레이의 크기는 arr에서 가장 큰 값 ~ 배열 전체 합까지
-
-        while(left <= end){
-            int mid = (left + end) / 2;
-            int raySum = 0;
-            int cnt = 0;
-            for (int i = 0; i < n; i++) {
-                if(raySum + arr[i] > mid){
-                    cnt++;
-                    raySum = 0;
-                }
-                raySum = raySum + arr[i];
-            }
-            if(raySum != 0){
-                cnt++;
-            }
-            if(cnt > m){
-                left = mid + 1;
-            }
-            else {
-                end = mid - 1;
+        // 이분 탐색: 블루레이 크기 탐색
+        int left = maxLecture, right = totalSum;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (isPossible(arr, n, m, mid)) {
+                right = mid - 1; // 더 작은 크기를 시도
+            } else {
+                left = mid + 1; // 더 큰 크기를 시도
             }
         }
+
         System.out.println(left);
+    }
 
-
+    // 블루레이 크기 `size`로 가능한지 확인
+    private static boolean isPossible(int[] arr, int n, int m, int size) {
+        int count = 1, currentSum = 0;
+        for (int time : arr) {
+            if (currentSum + time > size) {
+                count++;
+                currentSum = 0;
+            }
+            currentSum += time;
+        }
+        return count <= m;
     }
 }
